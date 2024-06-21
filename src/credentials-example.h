@@ -4,7 +4,7 @@
 #define WIFI_SSID "*****"
 #define WIFI_PASSWORD "*****"
 
-#define FIREBASE_HOST                                                          \
+#define DATABASE_URL                                                           \
 	"https://zgzmakerspace-default-rtdb.europe-west1.firebasedatabase.app/"
-#define FIREBASE_AUTH "*******"
+#define DATABASE_SECRET "*******"
 #endif

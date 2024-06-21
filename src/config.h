@@ -1,4 +1,4 @@
-#include "credentials.h"
+
 
 #define SWITCH_PIN 2
 // ------------------ SERIAL CONFIG --------------------//
@@ -26,10 +26,9 @@
 	}
 
 #if defined(ESP8266)
-#include <ESP8266HTTPClient.h>
 #include <ESP8266WiFi.h>
 #endif
 
 #if defined(ESP32)
-#include <HTTPClient.h>
+#include <WiFi.h>
 #endif

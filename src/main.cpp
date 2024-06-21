@@ -1,23 +1,27 @@
 #include "config.h"
-#include "wifiController.cpp"
-#include <Arduino.h>
+#include "credentials.h"
+
+#include "firebase_controller.h"
 #include <Bounce2.h>
-#include <FirebaseArduino.h>
 #include <Ticker.h>
 
 Bounce debouncer = Bounce();
+bool doorState = false;
 
-void sendFirebase(String tag, bool state) {
-	Firebase.setBool(tag, state);
+bool connectToWifi() {
+	WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-	if (Firebase.failed()) {
-		Serial.print("Error al enviar datos a Firebase: ");
-		Serial.println(Firebase.error());
-	} else {
-
-		Serial.print("Estado de la puerta: ");
-		Serial.println(state ? "Abierta" : "Cerrada");
+	Serial.print("Connecting to Wi-Fi");
+	while (WiFi.status() != WL_CONNECTED) {
+		Serial.print(".");
+		delay(300);
 	}
+	Serial.println();
+	Serial.print("Connected with IP: ");
+	Serial.println(WiFi.localIP());
+	Serial.println();
+
+	return WiFi.status() != WL_CONNECTED;
 }
 
 void checkButtonState() {
@@ -33,22 +37,21 @@ void checkSerial() {
 	if (Serial.available()) {
 		char data = Serial.read();
 		if (data == 'O') {
-			sendFirebase("ZMSDoor", true);
+			sendFirebase("ZMSDoor", true, false);
 		}
 		if (data == 'C') {
-			sendFirebase("ZMSDoor", false);
+			sendFirebase("ZMSDoor", false, false);
 		}
 	}
 }
 
 Ticker buttonTicker(checkButtonState, 100, 0, MILLIS);
 Ticker serialTicker(checkSerial, 100, 0, MILLIS);
-bool doorState = false;
 
-void init() {
+void initSesame() {
 	Serial.begin(115200);
 	pinMode(SWITCH_PIN, INPUT);
-	Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+	initFirebase();
 
 	debouncer.attach(SWITCH_PIN);
 	debouncer.interval(5);
@@ -56,19 +59,9 @@ void init() {
 	serialTicker.start();
 }
 
-void wifiConnect() {
-	WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-	Serial.print("Conectando a WiFi...");
-	while (WiFi.status() != WL_CONNECTED) {
-		delay(500);
-		Serial.print(".");
-	}
-	Serial.println("Conectado a la red WiFi");
-}
-
 void setup() {
-	init();
-	wifiConnect();
+	connectToWifi();
+	initSesame();
 }
 
 void loop() {
