@@ -32,13 +32,16 @@ void printError(int code, const String &msg) {
 void sendFirebase(String tag, bool state, bool pushTime = true) {
 	bool status = Database.set<bool>(client, "/" + tag, state);
 	if (status)
-		Serial.println("ok");
+		Serial.println("DATA SENT");
+		String name = Database.push<bool>(client, tag , state);
+		if (client.lastError().code() == 0)
+			Firebase.printf("SENT, status: %s\n", name.c_str());
 	else
 		printError(client.lastError().code(), client.lastError().message());
 
 	if (pushTime) {
 		String name = Database.push<bool>(client, tag + "/timestamp", state);
 		if (client.lastError().code() == 0)
-			Firebase.printf("SENT, status: %s\n", name.c_str());
+			Firebase.printf("Timestamp, status: %s\n", name.c_str());
 	}
 }
